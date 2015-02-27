@@ -1,0 +1,5 @@
+/bin
+/deploy
+/test/memorylog
+/test/junit-report.xml
+/test/memoryreport.log
