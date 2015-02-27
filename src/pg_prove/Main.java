@@ -22,7 +22,7 @@ public class Main {
 			System.exit(2);
 		}
 		CmdArgs arguments = CmdArgs.parse(args);
-		String url = "jdbc:postgresql:" + arguments.getDbName() + "?allowMultiQueries=true";
+		String url = "jdbc:postgresql:" + arguments.getDbName();
 		String username = null;
 		String password = null;
 
@@ -31,7 +31,7 @@ public class Main {
 			Statement cmd = db.createStatement();
 
 			boolean hasMoreResultSets = cmd.execute(sql);
-			READING_QUERY_RESULTS: // label
+			READING_QUERY_RESULTS:
 			while (hasMoreResultSets || cmd.getUpdateCount() != -1) {
 				if (hasMoreResultSets) {
 					ResultSet rs = cmd.getResultSet();
