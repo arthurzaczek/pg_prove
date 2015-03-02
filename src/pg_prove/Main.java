@@ -12,13 +12,10 @@ import java.sql.*;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.StreamSupport;
 
 public class Main {
 	public static void main(String[] args) {
 		Console.init();
-
-		out.println("pg_prove replacement written in java");
 
 		try {
 			Class.forName("org.postgresql.Driver");
@@ -28,6 +25,12 @@ public class Main {
 			System.exit(2);
 		}
 		CmdArgs arguments = CmdArgs.parse(args);
+
+		if (arguments.isPrintHelp()) {
+			CmdArgs.printHelp(out);
+			return;
+		}
+
 		String url = "jdbc:postgresql:" + arguments.getDbName();
 		String username = null;
 		String password = null;
@@ -82,7 +85,6 @@ public class Main {
 				junitOut.write(String
 						.format("<testsuite errors=\"0\" failures=\"%d\" hostname=\"empty\" name=\"checkproject-result\" skipped=\"0\" tests=\"%d\" time=\"1\" timestamp=\"2014-01-01T08:00:00\">\n",
 								failed, tests.size()));
-				int counter = 1;
 				for (TestCase t : tests) {
 					String message = t.getMessage();
 					String firstLine = message.split("\\n")[0];
@@ -94,7 +96,6 @@ public class Main {
 						junitOut.write("        </failure>\n");
 					}
 					junitOut.write("    </testcase>\n");
-					counter++;
 				}
 				junitOut.write("    <system-out><![CDATA[]]></system-out>\n");
 				junitOut.write("    <system-err><![CDATA[]]></system-err>\n");
