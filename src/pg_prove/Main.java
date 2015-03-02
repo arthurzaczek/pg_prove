@@ -38,21 +38,22 @@ public class Main {
 			Statement cmd = db.createStatement();
 
 			boolean hasMoreResultSets = cmd.execute(sql);
-			READING_QUERY_RESULTS: while (hasMoreResultSets || cmd.getUpdateCount() != -1) {
+			while (hasMoreResultSets || cmd.getUpdateCount() != -1) {
 				if (hasMoreResultSets) {
 					ResultSet rs = cmd.getResultSet();
 					while (rs.next()) {
 						String lines = rs.getString(1);
 						out.println(lines);
-						if (lines.startsWith("ok") || lines.startsWith("not ok")) {
-							tests.add(new TestCase(lines, lines.startsWith("ok")));
+						TestCase c = TestCase.parse(lines);
+						if (c != null) {
+							tests.add(c);
 						}
 					}
 					rs.close();
 				} else {
 					int queryResult = cmd.getUpdateCount();
 					if (queryResult == -1) {
-						break READING_QUERY_RESULTS;
+						continue;
 					}
 				}
 
