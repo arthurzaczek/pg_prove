@@ -63,7 +63,7 @@ public class Main {
 				hasMoreResultSets = cmd.getMoreResults();
 			}
 
-			exportJUnitResult(tests, "results-" + arguments.getFileName() + ".xml");
+			exportJUnitResult(tests, arguments.getOutputFileName());
 		} catch (SQLException e) {
 			out.println("** ERROR: Database exception:");
 			e.printStackTrace();

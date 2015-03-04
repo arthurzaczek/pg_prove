@@ -20,10 +20,17 @@ public class CmdArgs {
 	public String getFileName() {
 		return fileName;
 	}
-	
+
 	private boolean printHelp;
+
 	public boolean isPrintHelp() {
 		return printHelp;
+	}
+
+	private String outputFileName;
+
+	public String getOutputFileName() {
+		return outputFileName;
 	}
 
 	public static CmdArgs parse(String[] args) {
@@ -34,16 +41,21 @@ public class CmdArgs {
 				result.dbName = args[++idx];
 			} else if ("-H".equals(arg) || "--help".equals(arg)) {
 				result.printHelp = true;
+			} else if ("-O".equals(arg) || "--output".equals(arg)) {
+				result.outputFileName = args[++idx];
 			} else if (idx == args.length - 1) {
 				// Last arg
 				result.fileName = arg;
+				if(Helper.isNullOrEmpty(result.outputFileName)) {
+					result.outputFileName = "results-" + result.fileName + ".xml";
+				}
 			} else {
 				out.println(String.format("** WARNING: Unknown command line arg %s", arg));
 			}
 		}
 		return result;
 	}
-	
+
 	public static void printHelp(PrintWriter out) {
 		out.println("pg_prove replacement written in java.");
 		out.println("Most options are ");
@@ -59,7 +71,7 @@ public class CmdArgs {
 		out.println("TODO: -x,  --match REGEX          Regular expression to find xUnit tests.");
 		out.println();
 		out.println("TODO: -r,  --recurse              Recursively descend into directories.");
-		out.println("TODO: -O,  --output               Name of JUnit output xml file. Defaults to 'results-{filename}.xml'.");
+		out.println("-O,  --output               Name of JUnit output xml file. Defaults to 'results-{filename}.xml'.");
 		out.println();
 		out.println("TODO: -v,  --verbose              Print all test lines.");
 		out.println();
