@@ -22,13 +22,13 @@ public class Main {
 		} catch (ClassNotFoundException e) {
 			out.println("** ERROR: Unable to load postgresql driver");
 			e.printStackTrace();
-			System.exit(2);
+			System.exit(1);
 		}
 		CmdArgs arguments = CmdArgs.parse(args);
 
 		if (arguments.isPrintHelp()) {
 			CmdArgs.printHelp(out);
-			return;
+			System.exit(0);
 		}
 
 		String url = "jdbc:postgresql:" + arguments.getDbName();
@@ -64,15 +64,19 @@ public class Main {
 			}
 
 			exportJUnitResult(tests, arguments.getOutputFileName());
+			System.exit(0);
 		} catch (SQLException e) {
 			out.println("** ERROR: Database exception:");
 			e.printStackTrace();
+			System.exit(1);
 		} catch (FileNotFoundException e1) {
 			out.println("** ERROR: File not found:");
 			e1.printStackTrace();
+			System.exit(1);
 		} catch (IOException e1) {
 			out.println("** ERROR: I/O exception:");
 			e1.printStackTrace();
+			System.exit(1);
 		}
 	}
 
@@ -83,12 +87,12 @@ public class Main {
 			try (BufferedWriter junitOut = new BufferedWriter(new FileWriter(outFile))) {
 				junitOut.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
 				junitOut.write(String
-						.format("<testsuite errors=\"0\" failures=\"%d\" hostname=\"empty\" name=\"checkproject-result\" skipped=\"0\" tests=\"%d\" time=\"1\" timestamp=\"2014-01-01T08:00:00\">\n",
+						.format("<testsuite errors=\"0\" failures=\"%d\" hostname=\"empty\" name=\"pg-prove-result\" skipped=\"0\" tests=\"%d\" time=\"1\" timestamp=\"2014-01-01T08:00:00\">\n",
 								failed, tests.size()));
 				for (TestCase t : tests) {
 					String message = t.getMessage();
 					String firstLine = message.split("\\n")[0];
-					junitOut.write(String.format("    <testcase classname=\"checkproject\" name=\"%s\" time=\"0.0\">\n",
+					junitOut.write(String.format("    <testcase classname=\"pg_prove\" name=\"%s\" time=\"0.0\">\n",
 							Helper.xmlEscapeText(firstLine)));
 					if (!t.isSuccess()) {
 						junitOut.write("        <failure message=\"The test failed\" type=\"junit.framework.AssertionFailedError\">\n");
