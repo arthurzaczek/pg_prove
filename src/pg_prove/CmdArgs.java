@@ -2,6 +2,7 @@ package pg_prove;
 
 import static pg_prove.Console.out;
 
+import java.io.File;
 import java.io.PrintWriter;
 
 public class CmdArgs {
@@ -46,8 +47,9 @@ public class CmdArgs {
 			} else if (idx == args.length - 1) {
 				// Last arg
 				result.fileName = arg;
-				if(Helper.isNullOrEmpty(result.outputFileName)) {
-					result.outputFileName = "results-" + result.fileName + ".xml";
+				if (Helper.isNullOrEmpty(result.outputFileName)) {
+					File f = new File(result.fileName);
+					result.outputFileName = new File(f.getParent(), "results-" + f.getName() + ".xml").getPath();
 				}
 			} else {
 				out.println(String.format("** WARNING: Unknown command line arg %s", arg));
