@@ -22,8 +22,8 @@ public class CmdArgs {
 		return fileName != null && !"".equals(fileName);
 	}
 
-	public String getFileName() {
-		return fileName;
+	public File getFileName() {
+		return new File(fileName);
 	}
 
 	private boolean printHelp;

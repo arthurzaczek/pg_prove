@@ -3,12 +3,13 @@ package pg_prove;
 import static pg_prove.Console.out;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.sql.*;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,6 +31,11 @@ public class Main {
 			CmdArgs.printHelp(out);
 			System.exit(0);
 		}
+		File argFile = arguments.getFileName();
+		if (!argFile.exists()) {
+			out.println("** ERROR: File or directory " + argFile.getName() + " not found");
+			System.exit(1);
+		}
 
 		String url = "jdbc:postgresql:" + arguments.getDbName();
 		String username = null;
@@ -37,32 +43,42 @@ public class Main {
 		List<TestCase> tests = new LinkedList<TestCase>();
 
 		try (Connection db = DriverManager.getConnection(url, username, password)) {
-			String sql = String.join("\n", Files.readAllLines(Paths.get(arguments.getFileName())));
-			Statement cmd = db.createStatement();
-
-			boolean hasMoreResultSets = cmd.execute(sql);
-			while (hasMoreResultSets || cmd.getUpdateCount() != -1) {
-				if (hasMoreResultSets) {
-					ResultSet rs = cmd.getResultSet();
-					while (rs.next()) {
-						String lines = rs.getString(1);
-						out.println(lines);
-						TestCase c = TestCase.parse(lines);
-						if (c != null) {
-							tests.add(c);
-						}
-					}
-					rs.close();
-				} else {
-					int queryResult = cmd.getUpdateCount();
-					if (queryResult == -1) {
-						continue;
-					}
-				}
-
-				hasMoreResultSets = cmd.getMoreResults();
+			List<File> files;
+			if (argFile.isFile()) {
+				files = Arrays.asList(arguments.getFileName());
+			} else if (argFile.isDirectory()) {
+				files = Arrays.asList(argFile.listFiles());
+			} else {
+				throw new IllegalStateException("Argument " + argFile.getName() + " is neither a file or directory");
 			}
 
+			for (File file : files) {
+				String sql = String.join("\n", Files.readAllLines(file.toPath()));
+				Statement cmd = db.createStatement();
+
+				boolean hasMoreResultSets = cmd.execute(sql);
+				while (hasMoreResultSets || cmd.getUpdateCount() != -1) {
+					if (hasMoreResultSets) {
+						ResultSet rs = cmd.getResultSet();
+						while (rs.next()) {
+							String lines = rs.getString(1);
+							out.println(lines);
+							TestCase c = TestCase.parse(lines);
+							if (c != null) {
+								tests.add(c);
+							}
+						}
+						rs.close();
+					} else {
+						int queryResult = cmd.getUpdateCount();
+						if (queryResult == -1) {
+							continue;
+						}
+					}
+
+					hasMoreResultSets = cmd.getMoreResults();
+				}
+			}
 			exportJUnitResult(tests, arguments.getOutputFileName());
 			System.exit(0);
 		} catch (SQLException e) {
@@ -92,8 +108,7 @@ public class Main {
 				for (TestCase t : tests) {
 					String message = t.getMessage();
 					String firstLine = message.split("\\n")[0];
-					junitOut.write(String.format("    <testcase classname=\"pg_prove\" name=\"%s\" time=\"0.0\">\n",
-							Helper.xmlEscapeText(firstLine)));
+					junitOut.write(String.format("    <testcase classname=\"pg_prove\" name=\"%s\" time=\"0.0\">\n", Helper.xmlEscapeText(firstLine)));
 					if (!t.isSuccess()) {
 						junitOut.write("        <failure message=\"The test failed\" type=\"junit.framework.AssertionFailedError\">\n");
 						junitOut.write(Helper.xmlEscapeText(message));
