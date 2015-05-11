@@ -18,6 +18,10 @@ public class CmdArgs {
 
 	private String fileName;
 
+	public boolean hasFileName() {
+		return fileName != null && !"".equals(fileName);
+	}
+
 	public String getFileName() {
 		return fileName;
 	}

@@ -26,7 +26,7 @@ public class Main {
 		}
 		CmdArgs arguments = CmdArgs.parse(args);
 
-		if (arguments.isPrintHelp()) {
+		if (arguments.isPrintHelp() || !arguments.hasFileName()) {
 			CmdArgs.printHelp(out);
 			System.exit(0);
 		}
