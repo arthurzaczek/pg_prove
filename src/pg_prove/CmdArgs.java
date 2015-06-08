@@ -53,7 +53,7 @@ public class CmdArgs {
 				result.fileName = arg;
 				if (Helper.isNullOrEmpty(result.outputFileName)) {
 					File f = new File(result.fileName);
-					result.outputFileName = new File(f.getParent(), "results-" + f.getName() + ".xml").getPath();
+					result.outputFileName = new File(f.getParent(), "results-" + Helper.stripExtension(f.getName()) + ".xml").getPath();
 				}
 			} else {
 				out.println(String.format("** WARNING: Unknown command line arg %s", arg));

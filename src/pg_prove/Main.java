@@ -103,8 +103,8 @@ public class Main {
 			try (BufferedWriter junitOut = new BufferedWriter(new FileWriter(outFile))) {
 				junitOut.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
 				junitOut.write(String
-						.format("<testsuite errors=\"0\" failures=\"%d\" hostname=\"empty\" name=\"pg-prove-result\" skipped=\"0\" tests=\"%d\" time=\"1\" timestamp=\"2014-01-01T08:00:00\">\n",
-								failed, tests.size()));
+						.format("<testsuite name=\"%s\" errors=\"0\" failures=\"%d\" hostname=\"empty\" skipped=\"0\" tests=\"%d\" time=\"1\" timestamp=\"2014-01-01T08:00:00\">\n",
+								Helper.stripExtension(outFile), failed, tests.size()));
 				for (TestCase t : tests) {
 					String message = t.getMessage();
 					String firstLine = message.split("\\n")[0];
