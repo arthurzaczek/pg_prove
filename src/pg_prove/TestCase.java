@@ -3,7 +3,7 @@ package pg_prove;
 public class TestCase {
 	private String message;
 	private boolean success;
-	
+
 	public static TestCase parse(String lines) {
 		if (lines.startsWith("ok") || lines.startsWith("not ok")) {
 			TestCase s = new TestCase();
@@ -15,8 +15,14 @@ public class TestCase {
 		}
 	}
 
-	private TestCase()
-	{
+	public static TestCase fail(String error) {
+		TestCase s = new TestCase();
+		s.message = error;
+		s.success = false;
+		return s;
+	}
+
+	private TestCase() {
 	}
 
 	public String getMessage() {

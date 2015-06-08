@@ -150,8 +150,8 @@ public class TestRunner {
 			savepoint(db);
 		} catch (SQLException e) {
 			out.println("** ERROR: Database exception, ignoring and continue: " + e.getMessage());
+			tests.add(TestCase.fail(e.getMessage()));
 			rollbackToSavepoint(db);
 		}
 	}
-
 }
