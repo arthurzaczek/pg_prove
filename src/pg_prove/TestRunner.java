@@ -42,9 +42,12 @@ public class TestRunner {
 			throw new IllegalStateException("Argument " + argFile.getName() + " is neither a file or directory");
 		}
 
-		String url = "jdbc:postgresql:" + arguments.getDbName();
-		String username = null;
-		String password = null;
+		String url = String.format("jdbc:postgresql://%s:%d/%s",
+				arguments.getHost(),
+				arguments.getPort(),
+				arguments.getDbName());
+		String username = arguments.getUsername();
+		String password = arguments.getPassword();
 
 		try (Connection db = DriverManager.getConnection(url, username, password)) {
 			beginTransaction(db);
