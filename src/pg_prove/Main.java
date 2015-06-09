@@ -42,15 +42,16 @@ public class Main {
 		if (!Helper.isNullOrEmpty(outFile)) {
 			int failed = (int) tests.stream().filter(t -> !t.isSuccess()).count();
 
+			String name = Helper.stripExtension(outFile);
 			try (BufferedWriter junitOut = new BufferedWriter(new FileWriter(outFile))) {
 				junitOut.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
 				junitOut.write(String
 						.format("<testsuite name=\"%s\" errors=\"0\" failures=\"%d\" hostname=\"empty\" skipped=\"0\" tests=\"%d\" time=\"1\" timestamp=\"2014-01-01T08:00:00\">\n",
-								Helper.stripExtension(outFile), failed, tests.size()));
+								name, failed, tests.size()));
 				for (TestCase t : tests) {
 					String message = t.getMessage();
 					String firstLine = message.split("\\n")[0];
-					junitOut.write(String.format("    <testcase classname=\"pg_prove\" name=\"%s\" time=\"0.0\">\n", Helper.xmlEscapeText(firstLine)));
+					junitOut.write(String.format("    <testcase classname=\"%s\" name=\"%s\" time=\"0.0\">\n", name, Helper.xmlEscapeText(firstLine)));
 					if (!t.isSuccess()) {
 						junitOut.write("        <failure message=\"The test failed\" type=\"junit.framework.AssertionFailedError\">\n");
 						junitOut.write(Helper.xmlEscapeText(message));
