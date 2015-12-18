@@ -3,6 +3,7 @@ package pg_prove;
 import static pg_prove.Console.out;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collection;
@@ -42,7 +43,7 @@ public class Main {
 		if (!Helper.isNullOrEmpty(outFile)) {
 			int failed = (int) tests.stream().filter(t -> !t.isSuccess()).count();
 
-			String name = Helper.stripExtension(outFile);
+			String name = Helper.stripExtension(new File(outFile).getName());
 			try (BufferedWriter junitOut = new BufferedWriter(new FileWriter(outFile))) {
 				junitOut.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
 				junitOut.write(String
