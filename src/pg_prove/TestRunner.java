@@ -1,11 +1,14 @@
 package pg_prove;
 
+import javax.annotation.Resources;
+
 import static pg_prove.Console.out;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -51,6 +54,11 @@ public class TestRunner {
 
 		try (Connection db = DriverManager.getConnection(url, username, password)) {
 			beginTransaction(db);
+
+			if(!ensurePGTap(db)) {
+				System.exit(1);
+			}
+
 			for (File file : files) {
 				StringBuilder sql = new StringBuilder();
 				for (String line : Files.readAllLines(file.toPath())) {
@@ -79,11 +87,49 @@ public class TestRunner {
 			System.exit(1);
 		}
 	}
-	
+
+	private boolean ensurePGTap(Connection db) {
+		savepoint(db);
+		try {
+			Statement cmd = db.createStatement();
+			cmd.execute("select pg_version_num();");
+			ResultSet rs = cmd.getResultSet();
+			if (rs.next()) {
+				String version = rs.getString(1);
+				if(version != null && !version.equals("")) {
+					out.println("pgTap already installed.");
+					return true;
+				}
+			}
+		} catch (SQLException e) {
+			// pgTap not found
+			out.println("pgTap not found, installing...");
+		}
+		rollbackToSavepoint(db);
+
+		try {
+			String pgTap = Helper.readAllText(TestRunner.class.getResourceAsStream("pgtap.sql"));
+
+			Statement cmd = db.createStatement();
+			cmd.execute(pgTap);
+
+			savepoint(db);
+
+			return true;
+		} catch (SQLException e) {
+			out.println("** ERROR: unable to install pgTap ");
+			e.printStackTrace();
+		} catch (IOException e) {
+			out.println("** INTERNAL ERROR: unable to install pgTap ");
+			e.printStackTrace();
+		}
+
+		return false;
+	}
+
 	private void beginTransaction(Connection db) {
 		try {
 			Statement cmd = db.createStatement();
-			cmd = db.createStatement();
 			cmd.execute("BEGIN;");
 		} catch (SQLException e) {
 			out.println("** ERROR: unable to begin transaction ");
@@ -94,7 +140,6 @@ public class TestRunner {
 	private void rollbackToSavepoint(Connection db) {
 		try {
 			Statement cmd = db.createStatement();
-			cmd = db.createStatement();
 			cmd.execute("ROLLBACK TO SAVEPOINT sp");
 		} catch (SQLException e) {
 			out.println("** ERROR: unable to rollback to last savepoint: ");
@@ -105,7 +150,6 @@ public class TestRunner {
 	private void savepoint(Connection db) {
 		try {
 			Statement cmd = db.createStatement();
-			cmd = db.createStatement();
 			cmd.execute("SAVEPOINT sp");
 		} catch (SQLException e) {
 			// Ignore that. This may also be called outside a transaction.
@@ -115,7 +159,6 @@ public class TestRunner {
 	private void rollback(Connection db) {
 		try {
 			Statement cmd = db.createStatement();
-			cmd = db.createStatement();
 			cmd.execute("ROLLBACK;");
 		} catch (SQLException e) {
 			out.println("** ERROR: unable to rollback: ");
