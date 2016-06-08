@@ -18,11 +18,16 @@
 		<javac srcdir="src" destdir="bin" includeantruntime="false"
 			source="1.8" target="1.8">
 		</javac>
+		<copy todir="bin">
+			<fileset dir="src">
+				<include name="**/*.sql"/>
+			</fileset>
+		</copy>
 	</target>
 
 	<target name="jar" description="Create Jar file" depends="compile">
 		<mkdir dir="deploy" />
-		<jar jarfile="deploy/pg_prove.jar" basedir="bin" includes="**/*.class">
+		<jar jarfile="deploy/pg_prove.jar" basedir="bin" includes="**/*.class,**/*.sql">
 			<zipgroupfileset dir="libs" includes="*.jar"/>
 			<manifest>
 				<attribute name="Main-Class" value="pg_prove.Main" />
