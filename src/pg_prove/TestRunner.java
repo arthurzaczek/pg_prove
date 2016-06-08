@@ -97,13 +97,11 @@ public class TestRunner {
 			if (rs.next()) {
 				String version = rs.getString(1);
 				if(version != null && !version.equals("")) {
-					out.println("pgTap already installed.");
 					return true;
 				}
 			}
 		} catch (SQLException e) {
 			// pgTap not found
-			out.println("pgTap not found, installing...");
 		}
 		rollbackToSavepoint(db);
 

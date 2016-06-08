@@ -88,7 +88,7 @@ public class CmdArgs {
 
 	public static void printHelp(PrintWriter out) {
 		out.println("pg_prove replacement written in java.");
-		out.println("Most options are ");
+		out.println("Most options are implemented");
 		out.println();
 		out.println("Usage: pg_prove [options] {file|wildcard|directory}");
 		out.println();
