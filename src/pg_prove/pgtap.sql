@@ -781,17 +781,8 @@ BEGIN
     RETURN ok( TRUE, descr );
 EXCEPTION WHEN OTHERS THEN
     -- There should have been no exception.
-    GET STACKED DIAGNOSTICS
-        detail  = PG_EXCEPTION_DETAIL,
-        hint    = PG_EXCEPTION_HINT,
-        context = PG_EXCEPTION_CONTEXT,
-        schname = SCHEMA_NAME,
-        tabname = TABLE_NAME,
-        colname = COLUMN_NAME,
-        chkname = CONSTRAINT_NAME,
-        typname = PG_DATATYPE_NAME;
     RETURN ok( FALSE, descr ) || E'\n' || diag(
-           '    died: ' || _error_diag(SQLSTATE, SQLERRM, detail, hint, context, schname, tabname, colname, chkname, typname)
+           '    died: ' || || SQLSTATE || ': ' || SQLERRM
     );
 END;
 $$ LANGUAGE plpgsql;
@@ -6160,15 +6151,6 @@ BEGIN
                 -- Something went wrong. Record that fact.
                 errstate := SQLSTATE;
                 errmsg := SQLERRM;
-                GET STACKED DIAGNOSTICS
-                    detail  = PG_EXCEPTION_DETAIL,
-                    hint    = PG_EXCEPTION_HINT,
-                    context = PG_EXCEPTION_CONTEXT,
-                    schname = SCHEMA_NAME,
-                    tabname = TABLE_NAME,
-                    colname = COLUMN_NAME,
-                    chkname = CONSTRAINT_NAME,
-                    typname = PG_DATATYPE_NAME;
             END;
 
             -- Always raise an exception to rollback any changes.
@@ -6178,9 +6160,7 @@ BEGIN
             IF errmsg IS NOT NULL THEN
                 -- Something went wrong. Emit the error message.
                 tok := FALSE;
-               RETURN NEXT regexp_replace( diag('Test died: ' || _error_diag(
-                   errstate, errmsg, detail, hint, context, schname, tabname, colname, chkname, typname
-               )), '^', '    ', 'gn');
+               RETURN NEXT regexp_replace( diag('Test died: ' || errstate || ': ' || errmsg), '^', '    ', 'gn');
                 errmsg := NULL;
             END IF;
         END;
